@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>info.matthewryan</groupId>
+    <artifactId>orientdb-test-enron</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <orientdb.version>2.0-M2</orientdb.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-graphdb</artifactId>
+            <version>${orientdb.version}</version>
+            <exclusions>
+                <!-- these dependencies should be optional -->
+                <exclusion>
+                    <groupId>com.orientechnologies</groupId>
+                    <artifactId>orientdb-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.orientechnologies</groupId>
+                    <artifactId>orientdb-enterprise</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.orientechnologies</groupId>
+                    <artifactId>orientdb-tools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.tinkerpop</groupId>
+                    <artifactId>pipes</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.tinkerpop.gremlin</groupId>
+                    <artifactId>gremlin-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.tinkerpop.gremlin</groupId>
+                    <artifactId>gremlin-groovy</artifactId>
+                </exclusion>
+                <!-- not needed if LongIDVertexCache is not used -->
+                <exclusion>
+                    <groupId>colt</groupId>
+                    <artifactId>colt</artifactId>
+                </exclusion>
+                <!-- not needed if graphson is not used -->
+                <exclusion>
+                    <groupId>org.codehaus.jettison</groupId>
+                    <artifactId>jettison</artifactId>     
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.datatype</groupId>
+                    <artifactId>jackson-datatype-json-org</artifactId>     
+                </exclusion>
+                <!-- not used by OrientDB if using OrientGraphFactory -->
+                <exclusion>
+                    <artifactId>commons-configuration</artifactId>
+                    <groupId>commons-configuration</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>orientdb-embedded-all-${orientdb.version}</finalName>
+                            <minimizeJar>true</minimizeJar>
+                            <filters>
+                                <filter>
+                                    <artifact>com.orientechnologies:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>                                 
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>                               
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>                             
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>            
+        </plugins>      
+    </build>
+
+</project>
+
