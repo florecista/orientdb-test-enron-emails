@@ -1,6 +1,8 @@
 package info.matthewryan.orientdb;
 
 import com.google.common.collect.Iterables;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
@@ -15,10 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static java.nio.file.Files.*;
@@ -101,13 +100,15 @@ public final class ApplicationTest {
         }
     }
     private void loadVertices() {
-        Map<String, Object> keyMap = new HashMap();
-
+        int i = 1;
         for (String[] result : results) {
             OrientVertex orientVertex1 = oGraph.addVertex(result[0], "name", result[0]);
             OrientVertex orientVertex2 = oGraph.addVertex(result[1], "name", result[1]);
-            orientVertex1.addEdge(result[0] + ":" + result[1], orientVertex2);
-            orientVertex2.addEdge(result[1] + ":" + result[0], orientVertex1);
+            OrientEdge orientEdge = oGraph.addEdge(null, orientVertex1, orientVertex2,Integer.toString(i));
+            //orientEdge.setProperty("relationship", result[0] + ":" + result[1]);
+            //orientVertex1.addEdge(result[0] + ":" + result[1], orientVertex2);
+            //orientVertex2.addEdge(result[1] + ":" + result[0], orientVertex1);
+            i++;
         }
         oGraph.commit();
     }
@@ -116,7 +117,21 @@ public final class ApplicationTest {
     public void testVertices() {
         loadTestData();
         loadVertices();
-        assertEquals(3220, Iterables.size(oGraph.getVertices()));
         assertTrue(oGraph.getVertices().iterator().hasNext());
+        assertEquals(3220, Iterables.size(oGraph.getVertices()));
+        // Starting from OrientDB v1.4.x edges by default are stored as links not as records
+        assertEquals(0, Iterables.size(getEdges()));
+    }
+
+    private List<Edge> getEdges() {
+        List<Edge> edges = new LinkedList<>();
+        try {
+            oGraph.getEdges().forEach(edges::add);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return edges;
     }
 }
